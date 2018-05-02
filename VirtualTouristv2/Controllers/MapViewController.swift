@@ -1,10 +1,9 @@
 //
+//  AppDelegate.swift
+//  VirtualTouristv2
 //
-//  ViewController.swift
-//  VirtualTouristV1
-//
-//  Created by Sean Goldsborough on 11/26/17.
-//  Copyright © 2017 Sean Goldsborough. All rights reserved.
+//  Created by Sean Goldsborough on 4/2/18.
+//  Copyright © 2018 Sean Goldsborough. All rights reserved.
 //
 
 import UIKit
@@ -14,23 +13,15 @@ import CoreData
 class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
     
     var arrayOfPins = [Pin]()
-    //var arrayOfPins: [Pin]?
     var mapPin: Pin?
     var onePhoto: Photo?
     var arrayOfPhotos = [Photo]()
-    //var arrayOfPhotos: [Photo]!
     var selectedIndexPaths: [NSIndexPath]?
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
-    var dataController:DataController!
-    
-    //var fetchedResultsController:NSFetchedResultsController<NSFetchRequestResult>
+    var context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var fetchedResultsController:NSFetchedResultsController<Pin>!
     var fetchedResultsControllerPhotos:NSFetchedResultsController<Photo>!
-    
     var labelOnScreen = false
-    
     var randomNumberResults = 0
     
     @IBOutlet weak var overlayView: UIView!
@@ -43,32 +34,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
     @IBOutlet weak var tapPinsToDeleteLabel2: UIButton!
     
     @IBOutlet weak var tapPinsToDeleteLabel: UILabel!
-    
-    func saveContext() {
-        do {
-            try? context.save()
-            print("save context function called in map vc")
-        }catch {
-            AlertView.alertPopUp(view: self, alertMessage: "ERROR: Unable to save context")
-        }
-    }
-    
-//    func initializeFetchedResultsController() {
-//        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Pin")
-//        let departmentSort = NSSortDescriptor(key: "department.name", ascending: true)
-//        let lastNameSort = NSSortDescriptor(key: "lastName", ascending: true)
-//        request.sortDescriptors = [departmentSort, lastNameSort]
-//        
-//        let moc = context
-//        fetchedResultsController = NSFetchedResultsController(fetchRequest: request, managedObjectContext: moc, sectionNameKeyPath: nil, cacheName: nil) as! NSFetchedResultsController<Pin>
-//        fetchedResultsController.delegate = self
-//        
-//        do {
-//            try fetchedResultsController.performFetch()
-//        } catch {
-//            fatalError("Failed to initialize FetchedResultsController: \(error)")
-//        }
-//    }
     
     //LONG PRESS ON SCREEN TO ADD A NEW MAP PIN/ANNOTATION
     @IBAction func longPressGesture(_ sender: UILongPressGestureRecognizer) {
@@ -83,30 +48,18 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
             annotation.title = ""
             annotation.subtitle = ""
             
-            //appDelegate.saveContext()
-            
-            //let entity = String(describing: Pin.self)
-            //let entity = NSEntityDescription.entity(forEntityName: "Pin", in: self.context)
-            //print("BREAKPOINT!!!")
-            //let mapPin = NSManagedObject(entity: Pin.entity(), insertInto: context) as! Pin
-            //let mapPin = Pin(entity: Pin.entity(), insertInto: context)
-            let mapPin = NSEntityDescription.insertNewObject(forEntityName: "Pin", into: context) as! Pin
-
+            let mapPin = Pin(context: self.context)
             mapPin.latitude = locCoord.latitude
             mapPin.longitude = locCoord.longitude
             mapPin.creationDate = Date()
-            
-            print("mapPin lat is : \(mapPin.latitude)")
-            
-            arrayOfPins.insert(mapPin, at: 0)
+       
+            performUpdatesOnMain {
+                self.mapView.addAnnotation(annotation)
+                self.arrayOfPins.append(mapPin)
+                self.appDelegate.saveContext()
+            }
             
             print("arrayOfPins count is: \(arrayOfPins.count)")
-            
-            appDelegate.saveContext()
-            
-            print("mapPin photos are : \(mapPin.photos)")
-            
-            //print("mapPins in FRC are : \(fetchedResultsController.fetchedObjects!.count)")
             
             FlickrAPIClient.sharedInstance().getFlickrPhotos(lat: "\(mapPin.latitude)", long: "\(mapPin.longitude)", pageNum: randomNumberResults, chosenPin: mapPin) { (photosURLs, error) in
 
@@ -117,66 +70,139 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
                     return
                 }
 
-                //                    let entity = NSEntityDescription.entity(forEntityName: "Pin", in: self.dataController.viewContext)
-                //                    let mapPin = NSManagedObject(entity: entity!, insertInto: self.dataController.viewContext) as! Pin
-
-                let photo = Photo(context: self.context)
-                let entity = NSEntityDescription.entity(forEntityName: "Photo", in: self.context)
-                let photoModel = Photo(entity: Photo.entity(), insertInto: self.context)
-                //let photoModel = NSManagedObject(entity: Photo.entity(), insertInto: self.context) as! Photo
-                //photoModel.property1 = "some value"
-                //photoModel.videoId = video.valueForKeyPath("snippet.resourceId.videoId") as? String
-
                 for returnedURLs in photosURLs {
+                    let photo = Photo(context: self.context)
+                    print("for returnedURLs in photosURLs is called - \(mapPin.photos)")
+                    let entity = NSEntityDescription.entity(forEntityName: "Photo", in: self.context)
+                    let photoModel = Photo(entity: Photo.entity(), insertInto: self.context)
+                   
+                    //let photoModel = Photo()
+                    
+                    var date = Date()
+                    photoModel.creationDate = date
                     photoModel.photoURL = returnedURLs as! String
-                    self.addPhotos(creationDate: photoModel.creationDate! as Date, photoURL: photoModel.photoURL!)
-                    print("returnedPhotoURLs in photo model are\(photoModel.photoURL)")
+                    photoModel.pin = mapPin
 
-                    do {
-                        mapPin.photos = NSSet(object: photoModel)
-                        try self.appDelegate.saveContext()
-                        print("Photos photos count is : \(photoModel.creationDate)")
-                        print("map pin photos: \(mapPin.photos)")
-                        print("map pin debug: \(mapPin.debugDescription)")
+                    do{
+                        let url = URL(string: photoModel.photoURL!)
+                        var imageData = try NSData(contentsOf: url!)
+                        photoModel.photoData = imageData
+                        if photo.photoData != nil {
+                            print("2photo.photoData has data!")
+                        } else {
+
+                        }
                     }
-                    catch {
-                        AlertView.alertPopUp(view: self, alertMessage: "error loading photos to core data!")
-                        print("Error loading photos to core data!: \(error)")
+                    catch let error as NSError {
+                        AlertView.alertPopUp(view: self, alertMessage: "Unable to download images. Please try again.")
                     }
+                    
+                    //self.addPhotos(creationDate: photoModel.creationDate!, photoURL: photoModel.photoURL!, photoData: photoModel.photoData, mapPin: photoModel.pin!)
+//                    print("returnedPhotoURLs in photo model are\(photoModel.photoURL)")
+//                    print("returnedPhotoData in photo model are\(photoModel.photoData)")
+//                    print("returnedPhotoCreationDate in photo model are\(photoModel.creationDate)")
+  
+                    //self.arrayOfPhotos.append(photoModel)
+//                    print("arrayOfPhotos/photo model are\(self.arrayOfPhotos)")
+//                    print("arrayOfPhotos count is \(self.arrayOfPhotos.count)")
+                    
+                    //mapPin.photos = NSSet(object: photoModel)
+                    //mapPin.photos?.addingObjects(from: self.arrayOfPhotos)
+                    //print("map pin photos: \(mapPin.photos)")
+                    print("map pin photos count: \(mapPin.photos?.count)")
+                    //print("map pin debug: \(mapPin.debugDescription)")
+                    print("self.context is changed?: \(self.context.hasChanges)")
                 }
+//                performUpdatesOnMain {
+//                    self.mapView.addAnnotation(annotation)
+//                    print("mapView.annotations.count is: \(self.mapView.annotations.count)")
+//                    print("mapPin is: \(mapPin)")
+//                    print(" arrayOfPins.count is: \(self.arrayOfPins.count)")
+//                    self.arrayOfPins.append(mapPin)
+//                    self.appDelegate.saveContext()
+//                    print("mapPin photos are : \(mapPin.photos?.count)")
+//
+//                }
+                self.appDelegate.saveContext()
             }
             
-            self.mapView.addAnnotation(annotation)
-            print("mapView.annotations.count is: \(mapView.annotations.count)")
-            //print(" arrayOfPins.count is: \(self.arrayOfPins.count as? Int)")
-            self.arrayOfPins.append(mapPin)
-            //                let index = IndexPath(row: arrayOfPins.count - 1, section: 0)
-            //                let photoAlbumVC = storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as! CollectionViewController
-            //                let collVC = photoAlbumVC.collectionView
-            //                collVC?.insertItems(at: [index])
-            appDelegate.saveContext()
-            print("mapPin photos are : \(mapPin.photos?.count)")
-            
+            performUpdatesOnMain {
+                self.mapView.addAnnotation(annotation)
+                print("mapView.annotations.count is: \(self.mapView.annotations.count)")
+                print("mapPin is: \(mapPin)")
+                print(" arrayOfPins.count is: \(self.arrayOfPins.count)")
+                self.arrayOfPins.append(mapPin)
+                
+                print("mapPin photos are : \(mapPin.photos?.count)")
+                print("self.context is changed?:1 \(self.context.hasChanges)")
+            }
+        }
+    }
+    
+    func getImage(urlString: String, completionHandler: @escaping (_ results:NSData?,_ error:NSError?) -> ()){
+        do{
+            let url = URL(string: urlString)
+            let imageData = try NSData(contentsOf: url!)
+            completionHandler(imageData,nil)
+        }
+        catch let error as NSError {
+            completionHandler(nil,error)
         }
     }
     
     /// Adds a new photo to the end of the `photoalbum` array
-    func addPhotos(creationDate: Date, photoURL: String ) {
-        let photo = Photo(context: self.context)
-        photo.photoURL = photoURL
-        photo.creationDate = Date() as NSDate
-        try? appDelegate.saveContext()
-    }
-    
-    /// Deletes the photo at the specified index path
-    func deletePhotos(at indexPath: IndexPath) {
-        let photoToDelete = fetchedResultsController.object(at: indexPath)
-        context.delete(photoToDelete)
-        try? appDelegate.saveContext()
-    }
+//    func addPhotos(creationDate: Date, photoURL: String, photoData: NSData?, mapPin: Pin) {
+//        let photo = Photo(context: self.context)
+//        print("addPhotos was called - photo is in context?")
+//        var date = Date()
+//        photo.creationDate = date
+//        print("addPhotos creationDate is: \(photo.creationDate)")
+//        photo.photoURL = photoURL
+//        photo.pin = mapPin
+//        print("addPhotos was called")
+//
+//        do{
+//            let url = URL(string: photoURL)
+//            var imageData = try NSData(contentsOf: url!)
+//            photo.photoData = imageData
+//            if photo.photoData != nil {
+//                print("photo.photoData has data!")
+//            }
+//            //print("photoData is: \(photo.photoData)")
+//        }
+//        catch let error as NSError {
+//            AlertView.alertPopUp(view: self, alertMessage: "Unable to download images. Please try again.")
+//        }
+//
+////        getImage(urlString: photoURL) { (photoData, error) in
+////            //print("photo data in add photos is\(photoData)")
+////            print("getImage was called")
+////        }
+//
+//        performUpdatesOnMain {
+//            self.arrayOfPhotos.append(photo)
+//            print("arrayOfPhotos in add photos is\(self.arrayOfPhotos.count)")
+////            self.appDelegate.saveContext()
+////            print("save context in addPhotos was called")
+//        }
+//    }
+ 
+    /// TODO - Deletes the photo at the specified index path - ADD TO COLLECTION VIEW!!!
+//    func deletePhotos(at indexPath: IndexPath) {
+//        let photoToDelete = fetchedResultsController.object(at: indexPath)
+//        context.delete(photoToDelete)
+//        self.appDelegate.saveContext()
+//    }
     
     @objc func tapToDeletePin() {
         let annotation = MKPointAnnotation()
+        
+        for pinToDelete in arrayOfPins {
+            if pinToDelete.latitude == annotation.coordinate.latitude && pinToDelete.longitude == annotation.coordinate.longitude {
+                context.delete(pinToDelete)
+                self.appDelegate.saveContext()
+            }
+        }
         mapView.removeAnnotation(annotation)
     }
     
@@ -223,7 +249,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
         
         let entityName = String(describing: Pin.self)
         let fetchRequest = NSFetchRequest<Pin>(entityName: entityName)
-//      let fetchRequest:NSFetchRequest<Pin> = Pin.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: "pin")
@@ -239,96 +264,50 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
         
         do {
             try fetchedResultsController.performFetch()
+            print("fetched pins photos are\(fetchRequest.propertiesToFetch?.count)")
             print("fetch successful")
             
         } catch {
-            //fatalError("could not fetch: \(error.localizedDescription)")
             AlertView.alertPopUp(view: self, alertMessage: "could not fetch: \(error.localizedDescription)")
         }
-        
         let fetchCount = try? context.count(for: fetchRequest)
-        
         print("data controller on Map VC contains: \(fetchCount) Pin objects")
-        
-    }
-    
-    // Create fetch request
-//    func pinFetchRequest() -> [Pin] {
-//        let context = CoreDataStack.sharedInstance().context
-//        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Pin")
-//        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "lat", ascending: true), NSSortDescriptor(key: "long", ascending: true)]
-//        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: nil) as! NSFetchedResultsController<Pin>
-//
-//        // Get the saved pins
-//        do {
-//            return try context.fetch(fetchRequest) as! [Pin]
-//        } catch {
-//            print("There was an error fetching the list of pins.")
-//            return [Pin]()
-//        }
-//    }
-    
-    //    // Map persistent data
-    //    func mapSavedAnnotations() {
-    //
-    //        let pins = pinFetchRequest()
-    //
-    //        for pin in pins {
-    //            let annotation = MKPointAnnotation()
-    //            annotation.coordinate = pin.coordinate
-    //            mapView.addAnnotation(annotation)
-    //        }
-    //    }
-    
-    func viewPhotosFromPin(_ tappedPin: Pin) {
-        let photoAlbumVC = storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as! CollectionViewController
-        photoAlbumVC.passedPin = mapPin
-        navigationController!.pushViewController(photoAlbumVC, animated: true)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        print("Date is: \(Date())")
+
         setupFetchedResultsController()
-        
-        
         view.addGestureRecognizer(tap)
         tap.numberOfTapsRequired = 1
         tapPinsToDeleteLabel.isHidden = true
         
         randomNumber(start: 1, to: 25)
-        
-        self.activityView.startAnimating()
+
         self.overlayView.isHidden = false
         self.twoColorHorizontal()
-        Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(self.hideIndicator), userInfo: nil, repeats: false)
-        
+
         mapView.delegate = self
+        
         let initialLocation = CLLocation(latitude: 39.0997, longitude: -94.5786)
         let regionRadius: CLLocationDistance = 10000000
         func centerMapOnLocation(location: CLLocation) {
             let coordinateRegion = MKCoordinateRegionMakeWithDistance(location.coordinate, regionRadius, regionRadius)
             mapView.setRegion(coordinateRegion, animated: true)
+            self.hideIndicator()
         }
         centerMapOnLocation(location: initialLocation)
-        //        print("arrayOfPins count is: \(arrayOfPins.count)")
-        //        print("arrayOfPins is: \(arrayOfPins)")
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        //TODO: THISSSSSSSSSDDDDDDDOOOOOOOOOOOOOEEEEEEEEESSSSSSSSSSNNNNNNNNNNNNNTTTTTTTTTTWWWWWWWWOOOOOOOOOOORRRRRRRRRRRKKKKKKKKKKK!!!!!!!!!
-        
-        let moc = self.context
         let pinFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Pin")
         
-        do {
-            let fetchedPins = try moc.fetch(pinFetch) as! [Pin]
-            AlertView.alertPopUp(view: self, alertMessage: "FETCH REQUEST - VIEW WILL APPEAR was called")
-//                do {
-//                    try context.fetch(Pin.fetchRequest())
-                    //try context.fetch(Pin.fetchRequest())
+                do {
+                    let fetchedPins = try context.fetch(pinFetch) as! [Pin]
+                    print("NUMBER OF FETCHED PINS IN VIEW WILL APPEAR IS: \(fetchedPins.count)")
+
                 } catch let error as NSError {
                      print("ERROR ON MAP VC VIEW WILL APPEAR FETCH REQUEST \(error.userInfo)")
                     AlertView.alertPopUp(view: self, alertMessage: "ERROR ON FETCH REQUEST - VIEW WILL APPEAR")
@@ -357,6 +336,11 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
 
 extension MapViewController: MKMapViewDelegate {
     
+    func mapViewShouldReturn(_ mapView: MKMapView) -> Bool {
+        mapView.resignFirstResponder()
+        return true
+    }
+    
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
         guard let annotation = annotation as? MapAnnotation else { return nil }
@@ -381,49 +365,40 @@ extension MapViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
         let annotation = view.annotation
-        let pin = arrayOfPins.filter{$0.latitude == annotation?.coordinate.latitude && $0.longitude == annotation?.coordinate.longitude}.first
+        var pin = arrayOfPins.filter{$0.latitude == annotation?.coordinate.latitude && $0.longitude == annotation?.coordinate.longitude}.first
         //let pin = mapPin
         print("Pin is: \(pin)")
         
         if tapPinsToDeleteLabel.isHidden == true {
             
             let photoAlbumVC = storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as! CollectionViewController
-            //
-            //                    photoAlbumVC.passedLat = view.annotation?.coordinate.latitude
-            //                    photoAlbumVC.passedLong = view.annotation?.coordinate.longitude
-            photoAlbumVC.passedPin = pin ?? mapPin
-            //photoAlbumVC.context = self.context
-            //photoAlbumVC.photoAlbum = photoAlbumVC.passedPin.photos?.allObjects as! [Photos]
-            //print("passed pin photos are \(photoAlbumVC.passedPin.photos?.allObjects as! [Photos])")
+            photoAlbumVC.passedPin = pin
+            photoAlbumVC.context = self.context
+            photoAlbumVC.photoAlbum = self.arrayOfPhotos//photoAlbumVC.passedPin.photos?.allObjects as! [Photo]
+            //print("passed pin photos are \(photoAlbumVC.passedPin.photos?.allObjects as! [Photo])")
             
-            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
-            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-            let pred = NSPredicate(format: "pin = %@" , argumentArray: [pin as Any])
-            fetchRequest.predicate = pred
-            
-            //Create FetchedResultsController
-            photoAlbumVC.fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: "photos") as! NSFetchedResultsController<Photo>
+                for selectedPin in self.arrayOfPins{
+                    let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
+                    fetchRequest.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+                    let pred = NSPredicate(format: "pin = %@" , argumentArray: [pin as Any])
+                    fetchRequest.predicate = pred
+                    
+                    //Create FetchedResultsController
+                    photoAlbumVC.fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: "photos") as! NSFetchedResultsController<Photo>
+                 }
             
             navigationController?.pushViewController(photoAlbumVC, animated: true)
             
-        } else {
-            if let pinToDelete = pin {
-                arrayOfPins.remove(at: arrayOfPins.index(of: pinToDelete)!)
-                context.delete(pinToDelete)
-                appDelegate.saveContext()
+            } else {
+                if let pinToDelete = pin {
+                    arrayOfPins.remove(at: arrayOfPins.index(of: pinToDelete)!)
+                    context.delete(pinToDelete)
+                    self.appDelegate.saveContext()
+                }
+                mapView.removeAnnotation(view.annotation!)
+                print("Pin has been succefully deleted")
+                self.appDelegate.saveContext()
+                print("MapVC context has been succefully saved")
             }
-            mapView.removeAnnotation(view.annotation!)
-            print("Pin has been succefully deleted")
-        }
     }
-    
-    //    // MARK: MKMapViewDelegate
-    
-    func mapViewShouldReturn(_ mapView: MKMapView) -> Bool {
-        mapView.resignFirstResponder()
-        return true
-    }
-    
 }
-
-

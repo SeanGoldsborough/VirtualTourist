@@ -25,12 +25,15 @@ class FlickrAPIClient : NSObject {
     
     var session = URLSession.shared
     
-    var dataController:DataController!
+    var appDelegate = UIApplication.shared.delegate as! AppDelegate
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    var sharedContext: NSManagedObjectContext {
-        //return dataController.persistentContainer.viewContext
-        return dataController.viewContext
-    }
+    //var dataController:DataController!
+    
+//    var sharedContext: NSManagedObjectContext {
+//        //return dataController.persistentContainer.viewContext
+//        return dataController.viewContext
+//    }
     
     // MARK: Initializers
     
@@ -50,7 +53,7 @@ class FlickrAPIClient : NSObject {
             let userInfo = [NSLocalizedDescriptionKey : "Could not parse the data as JSON: '\(data)'"]
             completionHandlerForConvertData(nil, NSError(domain: "convertDataWithCompletionHandler", code: 1, userInfo: userInfo))
         }
-        print("JSON Serialization result is: \(parsedResult)")
+        //print("JSON Serialization result is: \(parsedResult)")
         completionHandlerForConvertData(parsedResult, nil)
         
     }
@@ -78,7 +81,7 @@ class FlickrAPIClient : NSObject {
         
         /* 2/3. Build the URL, Configure the request */
         let request = NSMutableURLRequest(url: flickrURLFromParameters(parameters  as [String:AnyObject]))
-        print("The Flickr GET URL Request is: \(request)")
+        //print("The Flickr GET URL Request is: \(request)")
         /* 4. Make the request */
         let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
             
@@ -106,11 +109,12 @@ class FlickrAPIClient : NSObject {
                 return
             }
             
-            print("Flickr GET: The URL Data Task Response is: \(response)")
+            //print("Flickr GET: The URL Data Task Response is: \(response)")
             
             /* 5/6. Parse the data and use the data (happens in completion handler) */
             self.convertDataWithCompletionHandler(data, completionHandlerForConvertData: completionHandlerForFlickrGET)
             print("data from Flickr get data task is: \(data)")
+            // self.appDelegate.saveContext()
         }
         
         /* 7. Start the request */
@@ -154,8 +158,10 @@ class FlickrAPIClient : NSObject {
         /* 2. Make the request */
         
         let _ = taskForGETMethodFlickr(variant: variant, parameters: methodParameters) { (results, error) in
-            print("The getFlickrPhotos JSON Data is: \(results!)")
-            
+            //print("The getFlickrPhotos JSON Data is: \(results!)")
+            if results == nil {
+                //AlertView.alertPopUp(view: self, alertMessage: "Unable to connect to network.")
+            }
             func sendError(_ error: String) {
                 print(error)
                 let userInfo = [NSLocalizedDescriptionKey : error]
@@ -168,7 +174,7 @@ class FlickrAPIClient : NSObject {
             } else {
                 guard let photosResults = results?[FlickrAPIClient.Constants.FlickrResponseKeys.Photos] as? [String: AnyObject] else {print("Error on photoResults from results");return}
                 
-                print("the flickr GET Request photoResults are: \(photosResults)")
+                //print("the flickr GET Request photoResults are: \(photosResults)")
                 
                 guard let photosArray = photosResults[FlickrAPIClient.Constants.FlickrResponseKeys.Photo] as? [[String: Any]] else {print("Error on photoURL from photosResults");return}
                 
@@ -179,6 +185,7 @@ class FlickrAPIClient : NSObject {
                 for pictureURL in photosArray{
                     photoURLS.append(pictureURL[FlickrAPIClient.Constants.FlickrParameterValues.MediumURL] as! String)
                     print("photosArray.count0 = \(photosArray.count)")
+                    print("photoURLS.count is = \(photoURLS.count)")
                 }
                 if photoURLS.count >= 0 {
                     // Return array of photo URLs and page count
@@ -191,15 +198,18 @@ class FlickrAPIClient : NSObject {
                     completionHandlerForFlickrGetPhotos(nil,error)
                 }
                 print("photosArray.count3 = \(photosArray.count)")
+//                performUpdatesOnMain {
+//                    self.appDelegate.saveContext()
+//                }
                 return
             }
         }
     }
     
-    func getImage(urlString: String, completionHandler: @escaping (_ results:Any?,_ error:NSError?)->()){
+    func getImage(urlString: String, completionHandler: @escaping (_ results: NSData?,_ error:NSError?) -> ()){
         do{
             let url = URL(string: urlString)
-            let imageData = try Data(contentsOf: url!)
+            let imageData = try NSData(contentsOf: url!)
             completionHandler(imageData,nil)
         }
         catch let error as NSError {
@@ -207,61 +217,127 @@ class FlickrAPIClient : NSObject {
         }
     }
     
-    // MARK: ADD INFO TO COREDATA METHODS
-    func addNewPhotos(_ pin: Pin, handler: @escaping (_ error: String?) -> Void) {
+    /// Adds a new photo to the end of the `photoalbum` array
+    func addPhotos(creationDate: Date, photoURL: String, photoData: NSData?, mapPin: Pin, view: UIViewController) {
+        let photo = Photo(context: self.context)
+        print("addPhotosCV was called - photo is in context?")
+        var date = Date()
+        photo.creationDate = date
+        print("addPhotosCV creationDate is: \(photo.creationDate)")
+        photo.photoURL = photoURL
+        photo.pin = mapPin
+        print("addPhotosCV was called")
         
-        getFlickrPhotos(lat: "\(pin.latitude)", long: "\(pin.longitude)", pageNum: 5, chosenPin: pin) { (photos, error) -> Void in
-            DispatchQueue.main.async(execute: {
-                
-                var photoTemp: Photo?
-                
-                print("Getting new photos for dropped pin...")
-                
-                // Add web URLs and Pin(s) only at this point...
-                var photoURLS = [String]()
-                if let entity = NSEntityDescription.entity(forEntityName: "Photos", in: self.dataController.viewContext) {
-                    for pictureURL in photos!{
-                        photoTemp?.photoURL = pictureURL
-                        //photoURLS.append(pictureURL[FlickrAPIClient.Constants.FlickrParameterValues.MediumURL] as! String)
-                        print("photosArray.count0 = \(photos?.count)")
-                    }
-                }
-                if photoTemp == nil {
-                    for photo in photos! {
-                        if let entity = NSEntityDescription.entity(forEntityName: "Photos", in: self.dataController.viewContext) {
-                            photoTemp = Photo(entity: entity, insertInto: self.dataController.viewContext)
-                            //photoTemp?.photoURL = photo["url_m"] //as? String
-                            photoTemp?.pin = pin
-                        }
-                    }
-                }
-                return handler(nil)
-            })
+        do{
+            let url = URL(string: photoURL)
+            var imageData = try NSData(contentsOf: url!)
+            photo.photoData = imageData
+            if photo.photoData != nil {
+                print("photo.photoDataCV has data!")
+            }
+        }
+        catch let error as NSError {
+            AlertView.alertPopUp(view: view, alertMessage: "Unable to download images. Please try again.")
         }
     }
+    
+    
+    func getDataForPhoto(_ currentCellPhoto: Photo, _ ImageURLString: String, completionHandlerForGetImageData: @escaping (_ imageData: NSData?, _ error: NSError?) -> Void) -> URLSessionTask { // return nothing, as we just gonna update the coreData directly
+        
+        // convert String to url
+        let imageURL = URL(string: ImageURLString)
+        
+        let session = URLSession.shared
+        
+        let task = session.dataTask(with: imageURL!) { (data, response, error) in
+            
+            // download has finished
+            
+            // handle error
+            guard (error == nil) else {
+                // has error:
+                if let error = error {
+                    print("Error downloading photo: \(error)")
+                    completionHandlerForGetImageData(nil, error as NSError?)
+                }
+                return
+            } // END of guard (error == nil) else {
+            
+            // check for response code
+            if let res = response as? HTTPURLResponse {
+                print("Downloaded photo with response code \(res.statusCode)")
+            }
+            
+            // deal with returned data!
+            if let returnedImageData = data {
+                // add to photo's property
+                DispatchQueue.main.async {
+                    currentCellPhoto.photoData = returnedImageData as NSData? // Photo's @NSManaged public var imageData: NSData?
+                }
+                
+                // should I update view here??? not really... - because you will block the UI as there are lots of photos! - do it at PhotoAlbumViewController...
+                completionHandlerForGetImageData(returnedImageData as NSData, nil)
+            }
+        } // END of let task =
+        task.resume()
+        return task
+    } // END of getImageData()
+    
+    // MARK: ADD INFO TO COREDATA METHODS
+//    func addNewPhotos(_ pin: Pin, handler: @escaping (_ error: String?) -> Void) {
+//
+//        getFlickrPhotos(lat: "\(pin.latitude)", long: "\(pin.longitude)", pageNum: 5, chosenPin: pin) { (photos, error) -> Void in
+//            DispatchQueue.main.async(execute: {
+//
+//                var photoTemp: Photo?
+//
+//                print("Getting new photos for dropped pin...")
+//
+//                // Add web URLs and Pin(s) only at this point...
+//                var photoURLS = [String]()
+//                if let entity = NSEntityDescription.entity(forEntityName: "Photos", in: self.context) {
+//                    for pictureURL in photos!{
+//                        photoTemp?.photoURL = pictureURL
+//                        //photoURLS.append(pictureURL[FlickrAPIClient.Constants.FlickrParameterValues.MediumURL] as! String)
+//                        print("photosArray.count0 = \(photos?.count)")
+//                    }
+//                }
+//                if photoTemp == nil {
+//                    for photo in photos! {
+//                        if let entity = NSEntityDescription.entity(forEntityName: "Photos", in: self.context) {
+//                            photoTemp = Photo(entity: entity, insertInto: self.context)
+//                            //photoTemp?.photoURL = photo["url_m"] //as? String
+//                            photoTemp?.pin = pin
+//                        }
+//                    }
+//                }
+//                return handler(nil)
+//            })
+//        }
+//    }
     
     // MARK: LOAD PHOTOS THAT ARE NOT SAVED IN COREDATA
     
     // Load photos from URLs
-    func loadNewPhoto(_ indexPath: IndexPath, photosArray: [Photo], handler: @escaping (_ image: UIImage?, _ data: Data?, _ error: String) -> Void) {
-        
-        if photosArray.count > 0 {
-            if photosArray[indexPath.item].photoURL != nil {
-                let task = URLSession.shared.dataTask(with: URLRequest(url: URL(string: photosArray[indexPath.item].photoURL!)!), completionHandler: { data, response, downloadError in
-                    DispatchQueue.main.async(execute: {
-                        
-                        guard let data = data, let image = UIImage(data: data) else {
-                            print("Photo not loaded")
-                            return handler(nil, nil, "Photo not loaded")
-                        }
-                        
-                        return handler(image, data, "")
-                    })
-                })
-                task.resume()
-            }
-        }
-    }
+//    func loadNewPhoto(_ indexPath: IndexPath, photosArray: [Photo], handler: @escaping (_ image: UIImage?, _ data: Data?, _ error: String) -> Void) {
+//
+//        if photosArray.count > 0 {
+//            if photosArray[indexPath.item].photoURL != nil {
+//                let task = URLSession.shared.dataTask(with: URLRequest(url: URL(string: photosArray[indexPath.item].photoURL!)!), completionHandler: { data, response, downloadError in
+//                    DispatchQueue.main.async(execute: {
+//
+//                        guard let data = data, let image = UIImage(data: data) else {
+//                            print("Photo not loaded")
+//                            return handler(nil, nil, "Photo not loaded")
+//                        }
+//
+//                        return handler(image, data, "")
+//                    })
+//                })
+//                task.resume()
+//            }
+//        }
+//    }
     
 }
 

@@ -133,22 +133,20 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                     <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                 </imageView>
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="vfT-ZN-ju6">
+                                                    <rect key="frame" x="31" y="31" width="37" height="37"/>
+                                                    <color key="color" red="0.99019607840000001" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                </activityIndicatorView>
                                                 <view multipleTouchEnabled="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="m9l-ON-Bqe">
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
-                                                    <subviews>
-                                                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="vfT-ZN-ju6">
-                                                            <rect key="frame" x="31" y="31" width="37" height="37"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                            <color key="color" red="0.1781851046" green="0.1888337148" blue="0.15687513310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                        </activityIndicatorView>
-                                                    </subviews>
-                                                    <color key="backgroundColor" red="1" green="0.78871805569999998" blue="0.72976693690000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="backgroundColor" red="0.99019607840000001" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 </view>
                                             </subviews>
                                         </view>
                                         <constraints>
                                             <constraint firstItem="bo4-35-WhL" firstAttribute="leading" secondItem="LhF-Hl-810" secondAttribute="leading" id="2Ex-BI-KCa"/>
                                             <constraint firstItem="m9l-ON-Bqe" firstAttribute="centerX" secondItem="bo4-35-WhL" secondAttribute="centerX" id="9de-Ww-tCL"/>
+                                            <constraint firstItem="vfT-ZN-ju6" firstAttribute="centerY" secondItem="LhF-Hl-810" secondAttribute="centerY" id="AbK-Ht-9sk"/>
                                             <constraint firstAttribute="bottom" secondItem="bo4-35-WhL" secondAttribute="bottom" id="ETr-hq-oRN"/>
                                             <constraint firstItem="m9l-ON-Bqe" firstAttribute="centerY" secondItem="bo4-35-WhL" secondAttribute="centerY" id="L5C-jP-920"/>
                                             <constraint firstItem="m9l-ON-Bqe" firstAttribute="height" secondItem="bo4-35-WhL" secondAttribute="height" id="TpT-ZF-5sC"/>
@@ -157,6 +155,7 @@
                                             <constraint firstItem="bo4-35-WhL" firstAttribute="centerY" secondItem="LhF-Hl-810" secondAttribute="centerY" id="iU9-8V-19v"/>
                                             <constraint firstItem="bo4-35-WhL" firstAttribute="top" secondItem="LhF-Hl-810" secondAttribute="top" id="ixP-SG-B2I"/>
                                             <constraint firstItem="m9l-ON-Bqe" firstAttribute="width" secondItem="bo4-35-WhL" secondAttribute="width" id="kYu-lC-G2q"/>
+                                            <constraint firstItem="vfT-ZN-ju6" firstAttribute="centerX" secondItem="LhF-Hl-810" secondAttribute="centerX" id="pRd-C6-KVx"/>
                                             <constraint firstItem="bo4-35-WhL" firstAttribute="centerX" secondItem="LhF-Hl-810" secondAttribute="centerX" id="xMY-d7-U13"/>
                                             <constraint firstItem="m9l-ON-Bqe" firstAttribute="top" secondItem="bo4-35-WhL" secondAttribute="bottom" constant="-100" id="xOR-M4-hjo"/>
                                         </constraints>
