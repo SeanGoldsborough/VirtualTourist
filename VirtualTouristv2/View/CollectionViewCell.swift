@@ -27,6 +27,8 @@ class CollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
+    var imageUrl: String = ""
+    
 //    weak var delegate: CollectionViewCellDelegate?
 ////
 //        func displayContent(image: UIImage) {

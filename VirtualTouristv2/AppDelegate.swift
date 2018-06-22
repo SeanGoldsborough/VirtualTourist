@@ -37,13 +37,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 try context.save()
                 print("DATA SAVED VIA saveContext METHOD IN APP DELEGATE")
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+
                 let saveContextError = error as NSError
                 print("ERROR ON APP DELEGATE SAVE CONTEXT METHOD \(saveContextError.userInfo)")
-                //fatalError("Unresolved error \(nserror), \(saveContextError.userInfo)")
+
             }
         }
+    }
+    
+    func fetchPhotos(_ predicate: NSPredicate? = nil, entityName: String, sorting: NSSortDescriptor? = nil) throws -> [Photo]? {
+        
+        let context = persistentContainer.viewContext
+        let fr = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+        fr.predicate = predicate
+        if let sorting = sorting {
+            fr.sortDescriptors = [sorting]
+        }
+        guard let photos = try context.fetch(fr) as? [Photo] else {
+            return nil
+        }
+        return photos
     }
     
     

@@ -13,8 +13,6 @@ import CoreData
 
 extension MapViewController {
     
-    // MARK: Show/Hide Label
-    
     func labelWillShow(_ notification: Notification) {
         if !labelOnScreen {
             view.frame.origin.y -= labelHeight(notification)
@@ -38,10 +36,9 @@ extension MapViewController {
     func labelHeight(_ notification: Notification) -> CGFloat {
         let userInfo = (notification as NSNotification).userInfo
         
-        //TODO: CHANGE THIS TO PERTAIN TO TAP TO DELETE BUTTON/LABEL
+        //TODO: CHANGE THIS TO PERTAIN TO TAP TO DELETE LABEL
         let labelSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue
         return  tapPinsToDeleteLabel.frame.height
-        //return keyboardSize.cgRectValue.height
     }
     
     func resignIfFirstResponder(_ mapView: MKMapView) {
@@ -60,18 +57,6 @@ extension MapViewController {
     
     func unsubscribeFromAllNotifications() {
         NotificationCenter.default.removeObserver(self)
-    }
-    
-    func twoColorHorizontal() {
-        let backgroundGradient = CAGradientLayer()
-        
-        let colorTop = UIColor(red: 0.345, green: 0.839, blue: 0.988, alpha: 1.0).cgColor
-        let colorBottom = UIColor(red: 0.023, green: 0.569, blue: 0.910, alpha: 1.0).cgColor
-        
-        backgroundGradient.colors = [colorTop, colorBottom]
-        backgroundGradient.locations = [0.0, 1.0]
-        backgroundGradient.frame = view.frame
-        view.layer.insertSublayer(backgroundGradient, at: 0)
     }
 }
 

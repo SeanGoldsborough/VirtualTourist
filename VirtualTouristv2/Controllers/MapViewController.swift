@@ -1,5 +1,5 @@
 //
-//  AppDelegate.swift
+//  MapViewController.swift
 //  VirtualTouristv2
 //
 //  Created by Sean Goldsborough on 4/2/18.
@@ -60,72 +60,7 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
             }
             
             print("arrayOfPins count is: \(arrayOfPins.count)")
-            
-            FlickrAPIClient.sharedInstance().getFlickrPhotos(lat: "\(mapPin.latitude)", long: "\(mapPin.longitude)", pageNum: randomNumberResults, chosenPin: mapPin) { (photosURLs, error) in
 
-                print("returnedPhotoURLs from FlickrGetPhotosCall On long press geusture is\(photosURLs)")
-
-                guard let photosURLs = photosURLs else {
-                    AlertView.alertPopUp(view: self, alertMessage: "Error on downloading photos")
-                    return
-                }
-
-                for returnedURLs in photosURLs {
-                    let photo = Photo(context: self.context)
-                    print("for returnedURLs in photosURLs is called - \(mapPin.photos)")
-                    let entity = NSEntityDescription.entity(forEntityName: "Photo", in: self.context)
-                    let photoModel = Photo(entity: Photo.entity(), insertInto: self.context)
-                   
-                    //let photoModel = Photo()
-                    
-                    var date = Date()
-                    photoModel.creationDate = date
-                    photoModel.photoURL = returnedURLs as! String
-                    photoModel.pin = mapPin
-
-                    do{
-                        let url = URL(string: photoModel.photoURL!)
-                        var imageData = try NSData(contentsOf: url!)
-                        photoModel.photoData = imageData
-                        if photo.photoData != nil {
-                            print("2photo.photoData has data!")
-                        } else {
-
-                        }
-                    }
-                    catch let error as NSError {
-                        AlertView.alertPopUp(view: self, alertMessage: "Unable to download images. Please try again.")
-                    }
-                    
-                    //self.addPhotos(creationDate: photoModel.creationDate!, photoURL: photoModel.photoURL!, photoData: photoModel.photoData, mapPin: photoModel.pin!)
-//                    print("returnedPhotoURLs in photo model are\(photoModel.photoURL)")
-//                    print("returnedPhotoData in photo model are\(photoModel.photoData)")
-//                    print("returnedPhotoCreationDate in photo model are\(photoModel.creationDate)")
-  
-                    //self.arrayOfPhotos.append(photoModel)
-//                    print("arrayOfPhotos/photo model are\(self.arrayOfPhotos)")
-//                    print("arrayOfPhotos count is \(self.arrayOfPhotos.count)")
-                    
-                    //mapPin.photos = NSSet(object: photoModel)
-                    //mapPin.photos?.addingObjects(from: self.arrayOfPhotos)
-                    //print("map pin photos: \(mapPin.photos)")
-                    print("map pin photos count: \(mapPin.photos?.count)")
-                    //print("map pin debug: \(mapPin.debugDescription)")
-                    print("self.context is changed?: \(self.context.hasChanges)")
-                }
-//                performUpdatesOnMain {
-//                    self.mapView.addAnnotation(annotation)
-//                    print("mapView.annotations.count is: \(self.mapView.annotations.count)")
-//                    print("mapPin is: \(mapPin)")
-//                    print(" arrayOfPins.count is: \(self.arrayOfPins.count)")
-//                    self.arrayOfPins.append(mapPin)
-//                    self.appDelegate.saveContext()
-//                    print("mapPin photos are : \(mapPin.photos?.count)")
-//
-//                }
-                self.appDelegate.saveContext()
-            }
-            
             performUpdatesOnMain {
                 self.mapView.addAnnotation(annotation)
                 print("mapView.annotations.count is: \(self.mapView.annotations.count)")
@@ -138,61 +73,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
             }
         }
     }
-    
-    func getImage(urlString: String, completionHandler: @escaping (_ results:NSData?,_ error:NSError?) -> ()){
-        do{
-            let url = URL(string: urlString)
-            let imageData = try NSData(contentsOf: url!)
-            completionHandler(imageData,nil)
-        }
-        catch let error as NSError {
-            completionHandler(nil,error)
-        }
-    }
-    
-    /// Adds a new photo to the end of the `photoalbum` array
-//    func addPhotos(creationDate: Date, photoURL: String, photoData: NSData?, mapPin: Pin) {
-//        let photo = Photo(context: self.context)
-//        print("addPhotos was called - photo is in context?")
-//        var date = Date()
-//        photo.creationDate = date
-//        print("addPhotos creationDate is: \(photo.creationDate)")
-//        photo.photoURL = photoURL
-//        photo.pin = mapPin
-//        print("addPhotos was called")
-//
-//        do{
-//            let url = URL(string: photoURL)
-//            var imageData = try NSData(contentsOf: url!)
-//            photo.photoData = imageData
-//            if photo.photoData != nil {
-//                print("photo.photoData has data!")
-//            }
-//            //print("photoData is: \(photo.photoData)")
-//        }
-//        catch let error as NSError {
-//            AlertView.alertPopUp(view: self, alertMessage: "Unable to download images. Please try again.")
-//        }
-//
-////        getImage(urlString: photoURL) { (photoData, error) in
-////            //print("photo data in add photos is\(photoData)")
-////            print("getImage was called")
-////        }
-//
-//        performUpdatesOnMain {
-//            self.arrayOfPhotos.append(photo)
-//            print("arrayOfPhotos in add photos is\(self.arrayOfPhotos.count)")
-////            self.appDelegate.saveContext()
-////            print("save context in addPhotos was called")
-//        }
-//    }
- 
-    /// TODO - Deletes the photo at the specified index path - ADD TO COLLECTION VIEW!!!
-//    func deletePhotos(at indexPath: IndexPath) {
-//        let photoToDelete = fetchedResultsController.object(at: indexPath)
-//        context.delete(photoToDelete)
-//        self.appDelegate.saveContext()
-//    }
     
     @objc func tapToDeletePin() {
         let annotation = MKPointAnnotation()
@@ -233,7 +113,7 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
     @objc func hideIndicator() {
         performUpdatesOnMain {
             self.activityView.stopAnimating()
-            self.twoColorHorizontal()
+            //self.twoColorHorizontal()
             self.activityView.isHidden = true
             self.overlayView.isHidden = true
         }
@@ -272,6 +152,10 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
         }
         let fetchCount = try? context.count(for: fetchRequest)
         print("data controller on Map VC contains: \(fetchCount) Pin objects")
+        
+        performUpdatesOnMain {
+            self.activityView.stopAnimating()
+        }
     }
     
     override func viewDidLoad() {
@@ -286,8 +170,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
         randomNumber(start: 1, to: 25)
 
         self.overlayView.isHidden = false
-        self.twoColorHorizontal()
-
         mapView.delegate = self
         
         let initialLocation = CLLocation(latitude: 39.0997, longitude: -94.5786)
@@ -312,11 +194,13 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
                      print("ERROR ON MAP VC VIEW WILL APPEAR FETCH REQUEST \(error.userInfo)")
                     AlertView.alertPopUp(view: self, alertMessage: "ERROR ON FETCH REQUEST - VIEW WILL APPEAR")
                 }
-        performUpdatesOnMain {
-            self.activityView.startAnimating()
-        }
+//        performUpdatesOnMain {
+//            self.activityView.startAnimating()
+//        }
       print("arrayOfPins count is: \(arrayOfPins.count)")
     }
+    
+  
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -363,19 +247,19 @@ extension MapViewController: MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+
         
         let annotation = view.annotation
         var pin = arrayOfPins.filter{$0.latitude == annotation?.coordinate.latitude && $0.longitude == annotation?.coordinate.longitude}.first
-        //let pin = mapPin
         print("Pin is: \(pin)")
         
         if tapPinsToDeleteLabel.isHidden == true {
-            
+            print("we didSelect mk annotation ")
+
             let photoAlbumVC = storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as! CollectionViewController
             photoAlbumVC.passedPin = pin
             photoAlbumVC.context = self.context
-            photoAlbumVC.photoAlbum = self.arrayOfPhotos//photoAlbumVC.passedPin.photos?.allObjects as! [Photo]
-            //print("passed pin photos are \(photoAlbumVC.passedPin.photos?.allObjects as! [Photo])")
+            photoAlbumVC.photoAlbum = self.arrayOfPhotos
             
                 for selectedPin in self.arrayOfPins{
                     let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
@@ -383,13 +267,12 @@ extension MapViewController: MKMapViewDelegate {
                     let pred = NSPredicate(format: "pin = %@" , argumentArray: [pin as Any])
                     fetchRequest.predicate = pred
                     
-                    //Create FetchedResultsController
                     photoAlbumVC.fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: "photos") as! NSFetchedResultsController<Photo>
                  }
-            
             navigationController?.pushViewController(photoAlbumVC, animated: true)
-            
+        
             } else {
+            
                 if let pinToDelete = pin {
                     arrayOfPins.remove(at: arrayOfPins.index(of: pinToDelete)!)
                     context.delete(pinToDelete)

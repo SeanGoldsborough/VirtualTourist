@@ -42,11 +42,11 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <view alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ubZ-nw-gt4">
+                            <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ubZ-nw-gt4">
                                 <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="iOn-QT-Dvw">
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="iOn-QT-Dvw">
                                 <rect key="frame" x="169" y="315" width="37" height="37"/>
                             </activityIndicatorView>
                         </subviews>
@@ -108,7 +108,9 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="d55-qa-OlF">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="250"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="250" id="nFz-nD-NNT"/>
+                                    <constraint firstAttribute="height" constant="250" id="nFz-nD-NNT">
+                                        <variation key="heightClass=compact" constant="133"/>
+                                    </constraint>
                                 </constraints>
                             </mapView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="9GA-yt-quP">
@@ -133,7 +135,7 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
                                                     <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                 </imageView>
-                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="vfT-ZN-ju6">
+                                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="vfT-ZN-ju6">
                                                     <rect key="frame" x="31" y="31" width="37" height="37"/>
                                                     <color key="color" red="0.99019607840000001" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 </activityIndicatorView>
@@ -172,6 +174,14 @@
                                     <outletCollection property="gestureRecognizers" destination="1jb-1i-dIF" appends="YES" id="Ufn-AZ-Ecn"/>
                                 </connections>
                             </collectionView>
+                            <view alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gby-u5-0BP">
+                                <rect key="frame" x="0.0" y="258" width="375" height="317"/>
+                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="bLa-U6-LhK">
+                                <rect key="frame" x="169" y="315" width="37" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </activityIndicatorView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ONn-R6-WBx">
                                 <rect key="frame" x="0.0" y="583" width="375" height="40"/>
                                 <constraints>
@@ -187,11 +197,17 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="9GA-yt-quP" firstAttribute="top" secondItem="d55-qa-OlF" secondAttribute="bottom" constant="8" id="1xr-sE-z4e"/>
+                            <constraint firstItem="gby-u5-0BP" firstAttribute="trailing" secondItem="18L-Ex-1Wc" secondAttribute="trailing" id="2zq-uR-lrc"/>
                             <constraint firstItem="ONn-R6-WBx" firstAttribute="leading" secondItem="18L-Ex-1Wc" secondAttribute="leading" id="5lu-x9-E3c"/>
+                            <constraint firstItem="ONn-R6-WBx" firstAttribute="top" secondItem="gby-u5-0BP" secondAttribute="bottom" constant="8" id="6xX-Qc-oKj"/>
                             <constraint firstItem="d55-qa-OlF" firstAttribute="top" secondItem="FGJ-Ms-mZo" secondAttribute="top" id="7VL-2m-8tV"/>
                             <constraint firstItem="ONn-R6-WBx" firstAttribute="top" secondItem="9GA-yt-quP" secondAttribute="bottom" constant="8" id="8os-8h-sYP"/>
                             <constraint firstItem="9GA-yt-quP" firstAttribute="top" secondItem="d55-qa-OlF" secondAttribute="bottom" constant="8" id="NNp-mR-ZTr"/>
                             <constraint firstItem="ONn-R6-WBx" firstAttribute="top" secondItem="9GA-yt-quP" secondAttribute="bottom" constant="8" id="PdI-uc-i01"/>
+                            <constraint firstItem="gby-u5-0BP" firstAttribute="top" secondItem="d55-qa-OlF" secondAttribute="bottom" constant="8" id="Q2u-Oi-563">
+                                <variation key="heightClass=compact" constant="8"/>
+                            </constraint>
+                            <constraint firstItem="gby-u5-0BP" firstAttribute="leading" secondItem="18L-Ex-1Wc" secondAttribute="leading" id="Tws-g2-pVR"/>
                             <constraint firstItem="d55-qa-OlF" firstAttribute="leading" secondItem="18L-Ex-1Wc" secondAttribute="leading" id="XIP-Es-8xE"/>
                             <constraint firstItem="ONn-R6-WBx" firstAttribute="bottom" secondItem="18L-Ex-1Wc" secondAttribute="bottom" id="dJQ-Wj-lgZ"/>
                             <constraint firstItem="9GA-yt-quP" firstAttribute="trailing" secondItem="18L-Ex-1Wc" secondAttribute="trailing" id="oAP-s7-ggk"/>
@@ -204,6 +220,8 @@
                     <toolbarItems/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="activityIndicator" destination="bLa-U6-LhK" id="C7i-tp-26O"/>
+                        <outlet property="activityOverlay" destination="gby-u5-0BP" id="BuU-aE-CL1"/>
                         <outlet property="bottomButton" destination="ONn-R6-WBx" id="d4S-rG-ez3"/>
                         <outlet property="collectionView" destination="9GA-yt-quP" id="qMN-ga-Slf"/>
                         <outlet property="mapViewColl" destination="d55-qa-OlF" id="Zdd-Uz-l2z"/>
@@ -216,7 +234,7 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1455" y="134"/>
+            <point key="canvasLocation" x="1453.2233883058473" y="132"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="B16-1X-u0x">

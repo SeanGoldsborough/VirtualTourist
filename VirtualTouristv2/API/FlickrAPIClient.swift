@@ -79,10 +79,10 @@ class FlickrAPIClient : NSObject {
     // MARK: GET Methods - Flickr
     func taskForGETMethodFlickr(variant: String, parameters: [String:AnyObject], completionHandlerForFlickrGET: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
         
-        /* 2/3. Build the URL, Configure the request */
+        
         let request = NSMutableURLRequest(url: flickrURLFromParameters(parameters  as [String:AnyObject]))
         //print("The Flickr GET URL Request is: \(request)")
-        /* 4. Make the request */
+       
         let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
             
             func sendError(_ error: String) {
@@ -91,19 +91,19 @@ class FlickrAPIClient : NSObject {
                 completionHandlerForFlickrGET(nil, NSError(domain: "taskForGETMethodFlickr", code: 1, userInfo: userInfo))
             }
             
-            /* GUARD: Was there an error? */
+           
             guard (error == nil) else {
                 sendError("Flickr GET: There was an error with your request: \(error!)")
                 return
             }
             
-            /* GUARD: Did we get a successful 2XX response? */
+            
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
                 sendError("Flickr GET: Your request returned a status code other than 2xx!")
                 return
             }
             
-            /* GUARD: Was there any data returned? */
+         
             guard let data = data else {
                 sendError("Flickr GET: No data was returned by the request!")
                 return
@@ -129,7 +129,7 @@ class FlickrAPIClient : NSObject {
         
         func bboxString() -> String {
             print("bbox func was called!")
-            // ensure bbox is bounded by minimum and maximums
+        
             if let latitude = Double(lat), let longitude = Double(long) {
                 let minimumLon = max(longitude - Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.0)
                 let minimumLat = max(latitude - Constants.Flickr.SearchBBoxHalfHeight, Constants.Flickr.SearchLatRange.0)
@@ -147,7 +147,7 @@ class FlickrAPIClient : NSObject {
             Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod as AnyObject,
             Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey as AnyObject,
             Constants.FlickrParameterKeys.BoundingBox: bboxString() as AnyObject,
-            Constants.FlickrParameterKeys.SafeSearch: "1", //Constants.FlickrParameterValues.UseSafeSearch,
+            Constants.FlickrParameterKeys.SafeSearch: "1",
             Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL,
             Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat,
             Constants.FlickrParameterKeys.NoJSONCallback: Constants.FlickrParameterValues.DisableJSONCallback
@@ -168,14 +168,11 @@ class FlickrAPIClient : NSObject {
                 completionHandlerForFlickrGetPhotos(nil, NSError(domain: "taskForGETMethodFlickr", code: 1, userInfo: userInfo))
             }
             
-            /* 3. Send the desired value(s) to completion handler */
             if let error = error {
                 completionHandlerForFlickrGetPhotos(nil, error)
             } else {
                 guard let photosResults = results?[FlickrAPIClient.Constants.FlickrResponseKeys.Photos] as? [String: AnyObject] else {print("Error on photoResults from results");return}
-                
-                //print("the flickr GET Request photoResults are: \(photosResults)")
-                
+
                 guard let photosArray = photosResults[FlickrAPIClient.Constants.FlickrResponseKeys.Photo] as? [[String: Any]] else {print("Error on photoURL from photosResults");return}
                 
                 print("the getParseRequest photo are: \(photosArray)")
@@ -188,7 +185,7 @@ class FlickrAPIClient : NSObject {
                     print("photoURLS.count is = \(photoURLS.count)")
                 }
                 if photoURLS.count >= 0 {
-                    // Return array of photo URLs and page count
+
                     print("photosArray.count1 = \(photosArray.count)")
                     print("photoURLS are = \(photoURLS)")
                     completionHandlerForFlickrGetPhotos(photoURLS,nil)
@@ -198,9 +195,7 @@ class FlickrAPIClient : NSObject {
                     completionHandlerForFlickrGetPhotos(nil,error)
                 }
                 print("photosArray.count3 = \(photosArray.count)")
-//                performUpdatesOnMain {
-//                    self.appDelegate.saveContext()
-//                }
+
                 return
             }
         }
@@ -217,7 +212,7 @@ class FlickrAPIClient : NSObject {
         }
     }
     
-    /// Adds a new photo to the end of the `photoalbum` array
+    
     func addPhotos(creationDate: Date, photoURL: String, photoData: NSData?, mapPin: Pin, view: UIViewController) {
         let photo = Photo(context: self.context)
         print("addPhotosCV was called - photo is in context?")
@@ -242,102 +237,43 @@ class FlickrAPIClient : NSObject {
     }
     
     
-    func getDataForPhoto(_ currentCellPhoto: Photo, _ ImageURLString: String, completionHandlerForGetImageData: @escaping (_ imageData: NSData?, _ error: NSError?) -> Void) -> URLSessionTask { // return nothing, as we just gonna update the coreData directly
-        
-        // convert String to url
+    func getDataForPhoto(_ currentCellPhoto: Photo, _ ImageURLString: String, completionHandlerForGetImageData: @escaping (_ imageData: NSData?, _ error: NSError?) -> Void) -> URLSessionTask {
+
         let imageURL = URL(string: ImageURLString)
         
         let session = URLSession.shared
         
         let task = session.dataTask(with: imageURL!) { (data, response, error) in
-            
-            // download has finished
-            
-            // handle error
+
             guard (error == nil) else {
-                // has error:
+ 
                 if let error = error {
                     print("Error downloading photo: \(error)")
                     completionHandlerForGetImageData(nil, error as NSError?)
                 }
                 return
-            } // END of guard (error == nil) else {
+            }
             
-            // check for response code
+       
             if let res = response as? HTTPURLResponse {
                 print("Downloaded photo with response code \(res.statusCode)")
             }
             
-            // deal with returned data!
+      
             if let returnedImageData = data {
-                // add to photo's property
+                
                 DispatchQueue.main.async {
-                    currentCellPhoto.photoData = returnedImageData as NSData? // Photo's @NSManaged public var imageData: NSData?
+                    currentCellPhoto.photoData = returnedImageData as NSData?
                 }
                 
-                // should I update view here??? not really... - because you will block the UI as there are lots of photos! - do it at PhotoAlbumViewController...
                 completionHandlerForGetImageData(returnedImageData as NSData, nil)
             }
-        } // END of let task =
+        }
         task.resume()
         return task
-    } // END of getImageData()
+    }
     
-    // MARK: ADD INFO TO COREDATA METHODS
-//    func addNewPhotos(_ pin: Pin, handler: @escaping (_ error: String?) -> Void) {
-//
-//        getFlickrPhotos(lat: "\(pin.latitude)", long: "\(pin.longitude)", pageNum: 5, chosenPin: pin) { (photos, error) -> Void in
-//            DispatchQueue.main.async(execute: {
-//
-//                var photoTemp: Photo?
-//
-//                print("Getting new photos for dropped pin...")
-//
-//                // Add web URLs and Pin(s) only at this point...
-//                var photoURLS = [String]()
-//                if let entity = NSEntityDescription.entity(forEntityName: "Photos", in: self.context) {
-//                    for pictureURL in photos!{
-//                        photoTemp?.photoURL = pictureURL
-//                        //photoURLS.append(pictureURL[FlickrAPIClient.Constants.FlickrParameterValues.MediumURL] as! String)
-//                        print("photosArray.count0 = \(photos?.count)")
-//                    }
-//                }
-//                if photoTemp == nil {
-//                    for photo in photos! {
-//                        if let entity = NSEntityDescription.entity(forEntityName: "Photos", in: self.context) {
-//                            photoTemp = Photo(entity: entity, insertInto: self.context)
-//                            //photoTemp?.photoURL = photo["url_m"] //as? String
-//                            photoTemp?.pin = pin
-//                        }
-//                    }
-//                }
-//                return handler(nil)
-//            })
-//        }
-//    }
-    
-    // MARK: LOAD PHOTOS THAT ARE NOT SAVED IN COREDATA
-    
-    // Load photos from URLs
-//    func loadNewPhoto(_ indexPath: IndexPath, photosArray: [Photo], handler: @escaping (_ image: UIImage?, _ data: Data?, _ error: String) -> Void) {
-//
-//        if photosArray.count > 0 {
-//            if photosArray[indexPath.item].photoURL != nil {
-//                let task = URLSession.shared.dataTask(with: URLRequest(url: URL(string: photosArray[indexPath.item].photoURL!)!), completionHandler: { data, response, downloadError in
-//                    DispatchQueue.main.async(execute: {
-//
-//                        guard let data = data, let image = UIImage(data: data) else {
-//                            print("Photo not loaded")
-//                            return handler(nil, nil, "Photo not loaded")
-//                        }
-//
-//                        return handler(image, data, "")
-//                    })
-//                })
-//                task.resume()
-//            }
-//        }
-//    }
+
     
 }
 

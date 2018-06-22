@@ -65,15 +65,13 @@ class AlertView {
         
         view.present(alertVC, animated: true, completion: nil)
     }
-    
-    
+  
     class func overwriteLocation(view: UIViewController, tabBarView: UITabBarController){
         
         let tabVC = view.storyboard!.instantiateViewController(withIdentifier: "TabBarController")
         let addVC = view.storyboard!.instantiateViewController(withIdentifier: "AddLocationVC")
         let confirmVC = view.storyboard!.instantiateViewController(withIdentifier: "ConfirmVC")
-        
-        
+   
         let alertVC = UIAlertController(title: "Confirm Overwrite Your Current Location?".capitalized, message: "", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style:.default, handler: nil)
         let okAction = UIAlertAction(title: "OK", style:.default, handler: {(action) -> Void in
