@@ -8,9 +8,10 @@
 
 import UIKit
 import MapKit
+import CoreLocation
 import CoreData
 
-class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
+class MapViewController: UIViewController, NSFetchedResultsControllerDelegate, CLLocationManagerDelegate {
     
     var arrayOfPins = [Pin]()
     var mapPin: Pin?
@@ -22,7 +23,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
     var fetchedResultsController:NSFetchedResultsController<Pin>!
     var fetchedResultsControllerPhotos:NSFetchedResultsController<Photo>!
     var labelOnScreen = false
-    var randomNumberResults = 0
     
     @IBOutlet weak var overlayView: UIView!
     @IBOutlet weak var activityView: UIActivityIndicatorView!
@@ -37,7 +37,7 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
     
     //LONG PRESS ON SCREEN TO ADD A NEW MAP PIN/ANNOTATION
     @IBAction func longPressGesture(_ sender: UILongPressGestureRecognizer) {
-        print("A Map Pin has been dropped!")
+        
         if sender.state == .ended {
             
             let location = sender.location(in: self.mapView)
@@ -138,21 +138,15 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
             arrayOfPins = result
             for pins in arrayOfPins {
                 addAnnotationCoordinate(pins)
-                print("fetched pins photos are\(pins.photos?.count)")
             }
         }
         
         do {
             try fetchedResultsController.performFetch()
-            print("fetched pins photos are\(fetchRequest.propertiesToFetch?.count)")
-            print("fetch successful")
-            
         } catch {
             AlertView.alertPopUp(view: self, alertMessage: "could not fetch: \(error.localizedDescription)")
         }
         let fetchCount = try? context.count(for: fetchRequest)
-        print("data controller on Map VC contains: \(fetchCount) Pin objects")
-        
         performUpdatesOnMain {
             self.activityView.stopAnimating()
         }
@@ -160,14 +154,10 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("Date is: \(Date())")
-
         setupFetchedResultsController()
         view.addGestureRecognizer(tap)
         tap.numberOfTapsRequired = 1
         tapPinsToDeleteLabel.isHidden = true
-        
-        randomNumber(start: 1, to: 25)
 
         self.overlayView.isHidden = false
         mapView.delegate = self
@@ -188,16 +178,10 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
         
                 do {
                     let fetchedPins = try context.fetch(pinFetch) as! [Pin]
-                    print("NUMBER OF FETCHED PINS IN VIEW WILL APPEAR IS: \(fetchedPins.count)")
-
                 } catch let error as NSError {
-                     print("ERROR ON MAP VC VIEW WILL APPEAR FETCH REQUEST \(error.userInfo)")
                     AlertView.alertPopUp(view: self, alertMessage: "ERROR ON FETCH REQUEST - VIEW WILL APPEAR")
                 }
-//        performUpdatesOnMain {
-//            self.activityView.startAnimating()
-//        }
-      print("arrayOfPins count is: \(arrayOfPins.count)")
+
     }
     
   
@@ -205,16 +189,6 @@ class MapViewController: UIViewController, NSFetchedResultsControllerDelegate {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         fetchedResultsController = nil
-    }
-    
-    func randomNumber(start: Int, to end: Int) -> Int {
-        var a = start
-        var b = end
-        if a > b {
-            swap(&a, &b)
-        }
-        self.randomNumberResults = Int(arc4random_uniform(UInt32(b - a + 1))) + a
-        return Int(arc4random_uniform(UInt32(b - a + 1))) + a
     }
 }
 
@@ -251,10 +225,8 @@ extension MapViewController: MKMapViewDelegate {
         
         let annotation = view.annotation
         var pin = arrayOfPins.filter{$0.latitude == annotation?.coordinate.latitude && $0.longitude == annotation?.coordinate.longitude}.first
-        print("Pin is: \(pin)")
         
         if tapPinsToDeleteLabel.isHidden == true {
-            print("we didSelect mk annotation ")
 
             let photoAlbumVC = storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as! CollectionViewController
             photoAlbumVC.passedPin = pin
@@ -279,9 +251,7 @@ extension MapViewController: MKMapViewDelegate {
                     self.appDelegate.saveContext()
                 }
                 mapView.removeAnnotation(view.annotation!)
-                print("Pin has been succefully deleted")
                 self.appDelegate.saveContext()
-                print("MapVC context has been succefully saved")
             }
     }
 }

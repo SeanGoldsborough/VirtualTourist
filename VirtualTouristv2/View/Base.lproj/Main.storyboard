@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Yfe-M6-dT7">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Yfe-M6-dT7">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
-    <customFonts key="customFonts">
-        <array key="AvenirNext.ttc">
-            <string>AvenirNext-Regular</string>
-        </array>
-    </customFonts>
     <scenes>
         <!--Virtual Tourist-->
         <scene sceneID="6E8-oj-rgS">
@@ -146,20 +141,20 @@
                                             </subviews>
                                         </view>
                                         <constraints>
-                                            <constraint firstItem="bo4-35-WhL" firstAttribute="leading" secondItem="LhF-Hl-810" secondAttribute="leading" id="2Ex-BI-KCa"/>
-                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="centerX" secondItem="bo4-35-WhL" secondAttribute="centerX" id="9de-Ww-tCL"/>
-                                            <constraint firstItem="vfT-ZN-ju6" firstAttribute="centerY" secondItem="LhF-Hl-810" secondAttribute="centerY" id="AbK-Ht-9sk"/>
-                                            <constraint firstAttribute="bottom" secondItem="bo4-35-WhL" secondAttribute="bottom" id="ETr-hq-oRN"/>
-                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="centerY" secondItem="bo4-35-WhL" secondAttribute="centerY" id="L5C-jP-920"/>
-                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="height" secondItem="bo4-35-WhL" secondAttribute="height" id="TpT-ZF-5sC"/>
-                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="leading" secondItem="bo4-35-WhL" secondAttribute="trailing" constant="-100" id="dmY-Zf-6yl"/>
-                                            <constraint firstAttribute="trailing" secondItem="bo4-35-WhL" secondAttribute="trailing" id="fjB-c0-e8n"/>
-                                            <constraint firstItem="bo4-35-WhL" firstAttribute="centerY" secondItem="LhF-Hl-810" secondAttribute="centerY" id="iU9-8V-19v"/>
-                                            <constraint firstItem="bo4-35-WhL" firstAttribute="top" secondItem="LhF-Hl-810" secondAttribute="top" id="ixP-SG-B2I"/>
-                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="width" secondItem="bo4-35-WhL" secondAttribute="width" id="kYu-lC-G2q"/>
-                                            <constraint firstItem="vfT-ZN-ju6" firstAttribute="centerX" secondItem="LhF-Hl-810" secondAttribute="centerX" id="pRd-C6-KVx"/>
-                                            <constraint firstItem="bo4-35-WhL" firstAttribute="centerX" secondItem="LhF-Hl-810" secondAttribute="centerX" id="xMY-d7-U13"/>
-                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="top" secondItem="bo4-35-WhL" secondAttribute="bottom" constant="-100" id="xOR-M4-hjo"/>
+                                            <constraint firstItem="bo4-35-WhL" firstAttribute="leading" secondItem="LhF-Hl-810" secondAttribute="leading" identifier="cell1" id="2Ex-BI-KCa"/>
+                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="centerX" secondItem="bo4-35-WhL" secondAttribute="centerX" identifier="overlay1" id="9de-Ww-tCL"/>
+                                            <constraint firstItem="vfT-ZN-ju6" firstAttribute="centerY" secondItem="LhF-Hl-810" secondAttribute="centerY" identifier="actInd1" id="AbK-Ht-9sk"/>
+                                            <constraint firstAttribute="bottom" secondItem="bo4-35-WhL" secondAttribute="bottom" identifier="cell2" id="ETr-hq-oRN"/>
+                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="centerY" secondItem="bo4-35-WhL" secondAttribute="centerY" identifier="overlay2" id="L5C-jP-920"/>
+                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="height" secondItem="bo4-35-WhL" secondAttribute="height" identifier="overlay3" id="TpT-ZF-5sC"/>
+                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="leading" secondItem="bo4-35-WhL" secondAttribute="trailing" constant="-100" identifier="overlay4" id="dmY-Zf-6yl"/>
+                                            <constraint firstAttribute="trailing" secondItem="bo4-35-WhL" secondAttribute="trailing" identifier="cell3" id="fjB-c0-e8n"/>
+                                            <constraint firstItem="bo4-35-WhL" firstAttribute="centerY" secondItem="LhF-Hl-810" secondAttribute="centerY" identifier="cell4" id="iU9-8V-19v"/>
+                                            <constraint firstItem="bo4-35-WhL" firstAttribute="top" secondItem="LhF-Hl-810" secondAttribute="top" identifier="cell5" id="ixP-SG-B2I"/>
+                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="width" secondItem="bo4-35-WhL" secondAttribute="width" identifier="overlay5" id="kYu-lC-G2q"/>
+                                            <constraint firstItem="vfT-ZN-ju6" firstAttribute="centerX" secondItem="LhF-Hl-810" secondAttribute="centerX" identifier="actInd2" id="pRd-C6-KVx"/>
+                                            <constraint firstItem="bo4-35-WhL" firstAttribute="centerX" secondItem="LhF-Hl-810" secondAttribute="centerX" identifier="cell6" id="xMY-d7-U13"/>
+                                            <constraint firstItem="m9l-ON-Bqe" firstAttribute="top" secondItem="bo4-35-WhL" secondAttribute="bottom" constant="-100" identifier="overlay6" id="xOR-M4-hjo"/>
                                         </constraints>
                                         <size key="customSize" width="100" height="100"/>
                                         <connections>
@@ -176,12 +171,20 @@
                             </collectionView>
                             <view alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gby-u5-0BP">
                                 <rect key="frame" x="0.0" y="258" width="375" height="317"/>
-                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <subviews>
+                                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="bLa-U6-LhK">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="317"/>
+                                        <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <color key="backgroundColor" red="0.99999600649999998" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="bLa-U6-LhK" firstAttribute="leading" secondItem="gby-u5-0BP" secondAttribute="leading" id="AIY-yv-QTf"/>
+                                    <constraint firstAttribute="bottom" secondItem="bLa-U6-LhK" secondAttribute="bottom" id="AXc-JW-ZXG"/>
+                                    <constraint firstAttribute="trailing" secondItem="bLa-U6-LhK" secondAttribute="trailing" id="Qth-4Z-oo9"/>
+                                    <constraint firstItem="bLa-U6-LhK" firstAttribute="top" secondItem="gby-u5-0BP" secondAttribute="top" id="joX-GU-tY1"/>
+                                </constraints>
                             </view>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="bLa-U6-LhK">
-                                <rect key="frame" x="169" y="315" width="37" height="37"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </activityIndicatorView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ONn-R6-WBx">
                                 <rect key="frame" x="0.0" y="583" width="375" height="40"/>
                                 <constraints>

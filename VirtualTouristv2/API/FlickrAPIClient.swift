@@ -24,16 +24,10 @@ class FlickrAPIClient : NSObject {
     // MARK: Properties
     
     var session = URLSession.shared
-    
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    //var dataController:DataController!
-    
-//    var sharedContext: NSManagedObjectContext {
-//        //return dataController.persistentContainer.viewContext
-//        return dataController.viewContext
-//    }
+    private var tasks: [String: URLSessionDataTask] = [:]
     
     // MARK: Initializers
     
@@ -48,14 +42,11 @@ class FlickrAPIClient : NSObject {
         var parsedResult: AnyObject! = nil
         do {
             parsedResult = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? AnyObject
-            
         } catch {
             let userInfo = [NSLocalizedDescriptionKey : "Could not parse the data as JSON: '\(data)'"]
             completionHandlerForConvertData(nil, NSError(domain: "convertDataWithCompletionHandler", code: 1, userInfo: userInfo))
         }
-        //print("JSON Serialization result is: \(parsedResult)")
         completionHandlerForConvertData(parsedResult, nil)
-        
     }
     
     // MARK: Helper for Creating a URL from Parameters
@@ -78,11 +69,8 @@ class FlickrAPIClient : NSObject {
     
     // MARK: GET Methods - Flickr
     func taskForGETMethodFlickr(variant: String, parameters: [String:AnyObject], completionHandlerForFlickrGET: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) -> URLSessionDataTask {
-        
-        
+     
         let request = NSMutableURLRequest(url: flickrURLFromParameters(parameters  as [String:AnyObject]))
-        //print("The Flickr GET URL Request is: \(request)")
-       
         let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
             
             func sendError(_ error: String) {
@@ -90,40 +78,35 @@ class FlickrAPIClient : NSObject {
                 let userInfo = [NSLocalizedDescriptionKey : error]
                 completionHandlerForFlickrGET(nil, NSError(domain: "taskForGETMethodFlickr", code: 1, userInfo: userInfo))
             }
-            
-           
+
             guard (error == nil) else {
                 sendError("Flickr GET: There was an error with your request: \(error!)")
                 return
             }
-            
-            
+   
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
                 sendError("Flickr GET: Your request returned a status code other than 2xx!")
                 return
             }
-            
-         
+
             guard let data = data else {
                 sendError("Flickr GET: No data was returned by the request!")
                 return
             }
-            
-            //print("Flickr GET: The URL Data Task Response is: \(response)")
-            
-            /* 5/6. Parse the data and use the data (happens in completion handler) */
+
             self.convertDataWithCompletionHandler(data, completionHandlerForConvertData: completionHandlerForFlickrGET)
             print("data from Flickr get data task is: \(data)")
-            // self.appDelegate.saveContext()
         }
         
-        /* 7. Start the request */
         task.resume()
         
         return task
     }
     
     // MARK: GET Convenience Methods - Flickr
+    // Makes HTTP request based on parameters.
+    //Gets the JSON data and parses for the urls for the photos
+    //and saves them as an array of strings
     
     func getFlickrPhotos(lat: String, long: String, pageNum: Int, chosenPin: Pin, _ completionHandlerForFlickrGetPhotos: @escaping (_ result: [String]?, _ error: NSError?) -> Void) {
         
@@ -155,12 +138,10 @@ class FlickrAPIClient : NSObject {
             ] as [String : AnyObject]
         
         let variant = ""
-        /* 2. Make the request */
         
         let _ = taskForGETMethodFlickr(variant: variant, parameters: methodParameters) { (results, error) in
-            //print("The getFlickrPhotos JSON Data is: \(results!)")
+            
             if results == nil {
-                //AlertView.alertPopUp(view: self, alertMessage: "Unable to connect to network.")
             }
             func sendError(_ error: String) {
                 print(error)
@@ -201,10 +182,10 @@ class FlickrAPIClient : NSObject {
         }
     }
     
-    func getImage(urlString: String, completionHandler: @escaping (_ results: NSData?,_ error:NSError?) -> ()){
+    func getImage(urlString: String, completionHandler: @escaping (_ results: Data?,_ error:NSError?) -> ()){
         do{
             let url = URL(string: urlString)
-            let imageData = try NSData(contentsOf: url!)
+            let imageData = try Data(contentsOf: url!)
             completionHandler(imageData,nil)
         }
         catch let error as NSError {
@@ -212,73 +193,73 @@ class FlickrAPIClient : NSObject {
         }
     }
     
+//      TODO: delete this func because its not being used anywhere
     
-    func addPhotos(creationDate: Date, photoURL: String, photoData: NSData?, mapPin: Pin, view: UIViewController) {
-        let photo = Photo(context: self.context)
-        print("addPhotosCV was called - photo is in context?")
-        var date = Date()
-        photo.creationDate = date
-        print("addPhotosCV creationDate is: \(photo.creationDate)")
-        photo.photoURL = photoURL
-        photo.pin = mapPin
-        print("addPhotosCV was called")
-        
-        do{
-            let url = URL(string: photoURL)
-            var imageData = try NSData(contentsOf: url!)
-            photo.photoData = imageData
-            if photo.photoData != nil {
-                print("photo.photoDataCV has data!")
-            }
-        }
-        catch let error as NSError {
-            AlertView.alertPopUp(view: view, alertMessage: "Unable to download images. Please try again.")
-        }
-    }
+//    func addPhotos(creationDate: Date, photoURL: String, photoData: NSData?, mapPin: Pin, view: UIViewController) {
+//        let photo = Photo(context: self.context)
+//        print("addPhotosCV was called - photo is in context?")
+//        var date = Date()
+//        photo.creationDate = date
+//        print("addPhotosCV creationDate is: \(photo.creationDate)")
+//        photo.photoURL = photoURL
+//        photo.pin = mapPin
+//        print("addPhotosCV was called")
+//
+//        do{
+//            let url = URL(string: photoURL)
+//            var imageData = try NSData(contentsOf: url!)
+//            photo.photoData = imageData
+//            if photo.photoData != nil {
+//                print("photo.photoDataCV has data!")
+//            }
+//        }
+//        catch let error as NSError {
+//            AlertView.alertPopUp(view: view, alertMessage: "Unable to download images. Please try again.")
+//        }
+//    }
     
+//  TODO: delete this func because its not being used anywhere
     
-    func getDataForPhoto(_ currentCellPhoto: Photo, _ ImageURLString: String, completionHandlerForGetImageData: @escaping (_ imageData: NSData?, _ error: NSError?) -> Void) -> URLSessionTask {
-
-        let imageURL = URL(string: ImageURLString)
-        
-        let session = URLSession.shared
-        
-        let task = session.dataTask(with: imageURL!) { (data, response, error) in
-
-            guard (error == nil) else {
- 
-                if let error = error {
-                    print("Error downloading photo: \(error)")
-                    completionHandlerForGetImageData(nil, error as NSError?)
-                }
-                return
-            }
-            
-       
-            if let res = response as? HTTPURLResponse {
-                print("Downloaded photo with response code \(res.statusCode)")
-            }
-            
-      
-            if let returnedImageData = data {
-                
-                DispatchQueue.main.async {
-                    currentCellPhoto.photoData = returnedImageData as NSData?
-                }
-                
-                completionHandlerForGetImageData(returnedImageData as NSData, nil)
-            }
-        }
-        task.resume()
-        return task
-    }
+//    func getDataForPhoto(_ currentCellPhoto: Photo, _ ImageURLString: String, completionHandlerForGetImageData: @escaping (_ imageData: NSData?, _ error: NSError?) -> Void) -> URLSessionTask {
+//
+//        let imageURL = URL(string: ImageURLString)
+//        let session = URLSession.shared
+//        let task = session.dataTask(with: imageURL!) { (data, response, error) in
+//
+//            guard (error == nil) else {
+//                if let error = error {
+//                    print("Error downloading photo: \(error)")
+//                    completionHandlerForGetImageData(nil, error as NSError?)
+//                }
+//                return
+//            }
+//            if let res = response as? HTTPURLResponse {
+//                print("Downloaded photo with response code \(res.statusCode)")
+//            }
+//            if let returnedImageData = data {
+//
+//                DispatchQueue.main.async {
+//                    currentCellPhoto.photoData = returnedImageData as NSData?
+//                }
+//                completionHandlerForGetImageData(returnedImageData as NSData, nil)
+//            }
+//        }
+//        task.resume()
+//        return task
+//    }
     
-
-    
+//        func downloadImage(imageUrl: String, result: @escaping (_ result: Data?, _ error: NSError?) -> Void) {
+//            guard let url = URL(string: imageUrl) else {
+//                return
+//            }
+////            let task = taskForGETMethodFlickr(nil, url, parameters: [:]) { (data, error) in
+//            let task = taskForGETMethodFlickr(variant: <#T##String#>, parameters: [:], completionHandlerForFlickrGET: data)
+//                result(data, error)
+//                self.tasks.removeValue(forKey: imageUrl)
+//            }
+//
+//            if tasks[imageUrl] == nil {
+//                tasks[imageUrl] = task
+//            }
+//        }
 }
-
-
-
-
-
-
