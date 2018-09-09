@@ -14,14 +14,12 @@ import CoreData
 class CollectionViewController: UIViewController, MKMapViewDelegate {
 
     fileprivate let itemsPerRow: CGFloat = 3
-
     fileprivate let sectionInsets = UIEdgeInsets(top: 10.0, left: 20.0, bottom: 50.0, right: 20.0)
 
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
     var context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     var fetchedResultsController: NSFetchedResultsController<Photo>!
-    //var fetchedResultsControllerPin: NSFetchedResultsController<Pin>!
 
     var passedPin: Pin!
     var photosInPin = 0
@@ -65,24 +63,14 @@ class CollectionViewController: UIViewController, MKMapViewDelegate {
         // Start the fetched results controller
         do {
             try fetchedResultsController.performFetch()
-
-            //let fetchCount = try? context.count(for: fetchRequest)
-            
         } catch let error as NSError {
-            
             AlertView.alertPopUp(view: self, alertMessage: "CVcould not fetch: \(error.localizedDescription)")
         }
-        //let fetchCount = try? context.count(for: fetchRequest)
-        
-        //TODO: delete this
-//        if fetchCount! < 1 {
-//            print("fetchCount is: \(fetchCount)")
-//            //getFlickrPhotos()
-//        }
     }
 
     fileprivate func getFlickrPhotos() {
         
+        //TODO: refactor these into their own function
         activityOverlay.isHidden = false
         activityIndicator.startAnimating()
         bottomButton.isEnabled = false
@@ -99,6 +87,8 @@ class CollectionViewController: UIViewController, MKMapViewDelegate {
                 return
             }
             
+            
+            //TODO: Refactor into cleaner logic
             if newPhotoURLs.count < 1 {
                 performUpdatesOnMain {
                     self.bottomButton.isEnabled = true
@@ -126,6 +116,7 @@ class CollectionViewController: UIViewController, MKMapViewDelegate {
             print("passedPin is: \(self.passedPin)")
             
             //Attaches URLs to Pin
+            //TODO: Refactor into its own function
             for returnedURLs in newPhotoURLs {
                 performUpdatesOnMain {
                     let pin = self.passedPin
@@ -147,30 +138,15 @@ class CollectionViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-//    private func storePhotos(_ photos: [Photo], forPin: Pin) {
-//        func showErrorMessage(msg: String) {
-//            AlertView.alertPopUp(view: self, alertMessage: "No Photos Found")
-//        }
-//
-//        for photo in photos {
-//            performUpdatesOnMain {
-//                if let url = photo.photoURL {
-//
-//                    _ = Photo(imageUrl: url, forPin: passedPin, context: self.context)
-//                    self.appDelegate.saveContext()
-//                }
-//            }
-//        }
-//    }
-    
     @IBAction func refreshRemoveButton(_ sender: Any) {
+        print("refresh button called")
+        randomNumber(start: 1, to: 25)
         
         activityOverlay.isHidden = false
         activityIndicator.startAnimating()
         bottomButton.isEnabled = false
 
         performUpdatesOnMain {
-
             for photo in self.photoAlbum {
                 self.context.delete(photo as! Photo)
             }
@@ -179,81 +155,13 @@ class CollectionViewController: UIViewController, MKMapViewDelegate {
         
         print("is refreshRemove first save call creating error?")
         self.appDelegate.saveContext()
-
-        randomNumber(start: 1, to: 25)
-
-        FlickrAPIClient.sharedInstance().getFlickrPhotos(lat: "\(self.passedPin.latitude)", long: "\(self.passedPin.longitude)", pageNum: self.randomNumberResults!, chosenPin: self.passedPin) { (newPhotoURLs, error) in
-
-            guard let newPhotoURLs = newPhotoURLs else {
-                performUpdatesOnMain {
-                    self.bottomButton.isEnabled = true
-                    self.activityOverlay.isHidden = true
-                    self.activityIndicator.stopAnimating()
-                    AlertView.alertPopUp(view: self, alertMessage: "Error on downloading photos")
-                }
-                return
-            }
-            
-            if newPhotoURLs.count < 1 {
-                
-                performUpdatesOnMain {
-                    self.bottomButton.isEnabled = true
-                    AlertView.alertPopUp(view: self, alertMessage: "Error on downloading photos (newPhotoURLs.count)")
-                }
-            } else if newPhotoURLs != nil {
-                self.urlArray.removeAll()
-                self.urlArray = newPhotoURLs
-                print("photos are in!")
-                print("url array is: \(self.urlArray)")
-
-                performUpdatesOnMain {
-                    self.urlArray.removeAll()
-                    self.urlArray = newPhotoURLs
-                    self.bottomButton.isEnabled = true
-                }
-            } else {
-                performUpdatesOnMain {
-                    self.bottomButton.isEnabled = true
-                    AlertView.alertPopUp(view: self, alertMessage: "No Photos Found")
-                }
-            }
-
-            for returnedURLs in newPhotoURLs {
-                let pin = self.passedPin
-                let photo = Photo(context: self.context)
-                
-                let entity = NSEntityDescription.entity(forEntityName: "Photo", in: self.context)
-                let photoModel = Photo(entity: Photo.entity(), insertInto: self.context)
-                var date = Date()
-                photoModel.creationDate = date
-                photoModel.photoURL = returnedURLs as! String
-                photoModel.pin = self.passedPin
-                photoModel.photoURL = returnedURLs as! String
-
-                do{
-                    let url = URL(string: photoModel.photoURL!)
-                    var imageData = try NSData(contentsOf: url!)
-                    photoModel.photoData = imageData
-                    if photo.photoData != nil {
-                        print("2photo.photoData has data!")
-                    }
-                }
-                catch let error as NSError {
-                    AlertView.alertPopUp(view: self, alertMessage: "Unable to download images. Please try again.")
-                }
-                
-                self.photoAlbum.append(photoModel)
-                
-                DispatchQueue.main.async {
-                    self.collectionView.reloadData()
-                }
-            }
-        }
-        
+        getFlickrPhotos()
+ 
+        //TODO: Refactor into its own dedicated function
         let fetchedObjects = fetchedResultsController.fetchedObjects
         print(fetchedObjects?.count)
         if fetchedObjects?.count != 0{
-           
+
             for image in fetchedObjects! {
                 let fetchedImage = image
                 self.photoAlbum.append(fetchedImage)

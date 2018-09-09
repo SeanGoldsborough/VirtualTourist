@@ -37,10 +37,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 try context.save()
                 print("DATA SAVED VIA saveContext METHOD IN APP DELEGATE")
             } catch {
-
                 let saveContextError = error as NSError
                 print("ERROR ON APP DELEGATE SAVE CONTEXT METHOD \(saveContextError.userInfo)")
-
             }
         }
     }

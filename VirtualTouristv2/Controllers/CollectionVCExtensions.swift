@@ -127,9 +127,9 @@ extension CollectionViewController : UICollectionViewDataSource, UICollectionVie
                                     }
                                 }
                                photo.photoData = NSData(data: data as Data)
-                                
+                                self.appDelegate.saveContext()  
                                 DispatchQueue.global(qos: .background).async {
-                                    self.appDelegate.saveContext()                                    
+                                    //self.appDelegate.saveContext()                                    
                                 }
                             }
                         }
