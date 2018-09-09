@@ -18,20 +18,15 @@ class CollectionViewController: UIViewController, MKMapViewDelegate {
 
     var appDelegate = UIApplication.shared.delegate as! AppDelegate
     var context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
     var fetchedResultsController: NSFetchedResultsController<Photo>!
-
     var passedPin: Pin!
     var photosInPin = 0
     var photoAlbum = [Photo]()
-
     var selectedIndexes = [IndexPath]()
     var deletedIndexPaths: [IndexPath]!
     var insertedIndexPaths: [IndexPath]!
     var updatedIndexPaths: [IndexPath]!
-
     var urlArray = [String]()
-
     var randomNumberResults: Int?
 
     private let reuseIdentifier = "CollectionItem"
@@ -86,7 +81,6 @@ class CollectionViewController: UIViewController, MKMapViewDelegate {
                 }
                 return
             }
-            
             
             //TODO: Refactor into cleaner logic
             if newPhotoURLs.count < 1 {
@@ -229,5 +223,4 @@ class CollectionViewController: UIViewController, MKMapViewDelegate {
         super.viewWillDisappear(animated)
         fetchedResultsController = nil
     }
-
 }

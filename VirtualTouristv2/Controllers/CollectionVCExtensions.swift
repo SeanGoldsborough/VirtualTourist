@@ -39,16 +39,12 @@ extension CollectionViewController : UICollectionViewDataSource, UICollectionVie
             cell.cellImage.image = nil
             cell.activityIndicator.startAnimating()
             cell.overlayView.isHidden = false
-        //print("number of cells is now \(indexPath.row)")
 
         performUpdatesOnMain {
             cell.cellImage.image = nil
             cell.activityIndicator.startAnimating()
             cell.overlayView.isHidden = false
         }
-        
-       
-        
         return cell
     }
     
@@ -58,41 +54,26 @@ extension CollectionViewController : UICollectionViewDataSource, UICollectionVie
         collViewCell.imageUrl = photo.photoURL!
      
         //TODO: configCollViewCellImage here
-        //setupPhoto(cell: collViewCell, photo: photo, collectionView: collectionView, indexPath: indexPath)
         performUpdatesOnMain {
             self.configImage(cell: collViewCell, photo: photo, collectionView: collectionView, indexPath: indexPath)
         }
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
-        //let cell = collectionView.cellForItem(at: indexPath) as! CollectionViewCell
+
         let photoToDelete = fetchedResultsController.object(at: indexPath)
         self.context.delete(photoToDelete)
         self.appDelegate.saveContext()
     }
     
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt: IndexPath) {
-//        TODO:  CAN PROBABLY DELETE THIS!
-//        let collViewCell = cell as! CollectionViewCell
-//        collViewCell.activityIndicator.stopAnimating()
-//        collViewCell.overlayView.isHidden = true
-//        self.appDelegate.saveContext()
 
         if collectionView.cellForItem(at: forItemAt) == nil {
             return
         }
         
         let photo = fetchedResultsController.object(at: forItemAt)
-//        let collViewCell = cell as! CollectionViewCell
-//        //photo.photoData = NSData(data: photo.photoData! as Data)
-//        collViewCell.cellImage.image = UIImage(data: photo.photoData! as Data)
-        
-        
         if let imageUrl = photo.photoURL {
-            //Client.shared().cancelDownload(imageUrl)
-            
             //TODO: func to stop downloading here
         }
     }
@@ -139,64 +120,6 @@ extension CollectionViewController : UICollectionViewDataSource, UICollectionVie
             }
         }
     }
-// MARK: - Helpers
-
-//private func configImage(using cell: PhotoViewCell, photo: Photo, collectionView: UICollectionView, index: IndexPath) {
-//
-//    if let imageData = photo.image {
-//        cell.activityIndicator.stopAnimating()
-//        cell.imageView.image = UIImage(data: Data(referencing: imageData))
-//    } else {
-//        if let imageUrl = photo.imageUrl {
-//            cell.activityIndicator.startAnimating()
-//            Client.shared().downloadImage(imageUrl: imageUrl) { (data, error) in
-//                if let _ = error {
-//                    self.performUIUpdatesOnMain {
-//                        cell.activityIndicator.stopAnimating()
-//                        self.errorForImageUrl(imageUrl)
-//                    }
-//                    return
-//                } else if let data = data {
-//                    self.performUIUpdatesOnMain {
-//
-//                        if let currentCell = collectionView.cellForItem(at: index) as? PhotoViewCell {
-//                            if currentCell.imageUrl == imageUrl {
-//                                currentCell.imageView.image = UIImage(data: data)
-//                                cell.activityIndicator.stopAnimating()
-//                            }
-//                        }
-//                        photo.image = NSData(data: data)
-//                        DispatchQueue.global(qos: .background).async {
-//                            self.save()
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//    func downloadImage(imageUrl: String, result: @escaping (_ result: Data?, _ error: NSError?) -> Void) {
-//        guard let url = URL(string: imageUrl) else {
-//            return
-//        }
-//        let task = taskForGETMethod(nil, url, parameters: [:]) { (data, error) in
-//            result(data, error)
-//            self.tasks.removeValue(forKey: imageUrl)
-//        }
-//
-//        if tasks[imageUrl] == nil {
-//            tasks[imageUrl] = task
-//        }
-//    }
-//
-//    func cancelDownload(_ imageUrl: String) {
-//        tasks[imageUrl]?.cancel()
-//        if tasks.removeValue(forKey: imageUrl) != nil {
-//            print("\(#function) task canceled: \(imageUrl)")
-//        }
-//    }
-//}
 
 extension CollectionViewController: UICollectionViewDelegateFlowLayout {
     
